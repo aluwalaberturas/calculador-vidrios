@@ -176,6 +176,13 @@
     color: var(--text);
   }
   td.gold { color: var(--gold); }
+  td.obs, th.obs {
+    width: 200px;
+    min-width: 160px;
+    max-width: 220px;
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
   .del {
     background: none;
     border: none;
@@ -220,6 +227,12 @@
       color: #000;
     }
     .sheet2 table { font-size: 14px; }
+    .sheet2 table.grid th,
+    .sheet2 table.grid td {
+      border: 1px solid #000;
+      padding: 8px 10px;
+    }
+    .sheet2 table.grid { border-collapse: collapse; }
   }
 </style>
 </head>
@@ -302,7 +315,7 @@
           <th>Ventana</th>
           <th>Vidrio</th>
           <th>Cant.</th>
-          <th>Obs.</th>
+          <th class="obs">Obs.</th>
           <th class="no-print"></th>
         </tr>
       </thead>
@@ -314,11 +327,13 @@
 
   <div class="sheet2">
     <h2>ALUWAL ABERTURAS — MEDIDAS DE VIDRIO</h2>
-    <table id="tabla2">
+    <table id="tabla2" class="grid">
       <thead>
         <tr>
+          <th>ID</th>
           <th>Ancho (mm)</th>
           <th>Alto (mm)</th>
+          <th>Composición</th>
         </tr>
       </thead>
       <tbody id="tbody2"></tbody>
@@ -451,12 +466,16 @@ function render() {
       '<td>' + item.ventana + ' mm</td>' +
       '<td class="gold">' + item.vidrioAncho + ' x ' + item.vidrioAlto + ' mm</td>' +
       '<td>' + item.cantidad + '</td>' +
-      '<td>' + (item.observacion || '') + '</td>' +
+      '<td class="obs">' + (item.observacion || '') + '</td>' +
       '<td class="no-print"><button class="del" onclick="eliminar(' + i + ')">&times;</button></td>';
     tbody.appendChild(tr);
 
     const tr2 = document.createElement('tr');
-    tr2.innerHTML = '<td>' + item.vidrioAncho + '</td><td>' + item.vidrioAlto + '</td>';
+    tr2.innerHTML =
+      '<td>' + item.nombre + '</td>' +
+      '<td>' + item.vidrioAncho + '</td>' +
+      '<td>' + item.vidrioAlto + '</td>' +
+      '<td>' + item.composicion + '</td>';
     tbody2.appendChild(tr2);
   });
 }
