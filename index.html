@@ -153,6 +153,13 @@
     margin: 0;
     color: var(--text);
   }
+  .lista-title { display: flex; flex-direction: column; gap: 6px; }
+  .ml-total {
+    color: var(--gold);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
   .lista-actions { display: flex; gap: 10px; }
   .lista-actions button { padding: 9px 16px; font-size: 10px; }
   .tabla-wrap { overflow-x: auto; }
@@ -325,7 +332,10 @@
 
   <div class="lista-card">
     <div class="lista-head no-print">
-      <h2>Planilla de vidrios</h2>
+      <div class="lista-title">
+        <h2>Planilla de vidrios</h2>
+        <span class="ml-total" id="mlTotal">ML total obra: 0.00mts</span>
+      </div>
       <div class="lista-actions">
         <button onclick="imprimir()">Imprimir</button>
         <button onclick="vaciar()">Vaciar</button>
@@ -441,6 +451,8 @@ function agregar() {
     lado: lado === 'frente' ? 'Frente' : 'Contrafrente',
     composicion,
     tipo: tipoLabel,
+    anchoVentana: Math.round(ancho),
+    altoVentana: Math.round(alto),
     ventana: Math.round(ancho) + ' x ' + Math.round(alto),
     vidrioAncho: Math.round(vidrioAncho),
     vidrioAlto: Math.round(vidrioAlto),
@@ -476,12 +488,19 @@ function guardar() {
   localStorage.setItem('aluwal_vidrios_lista', JSON.stringify(lista));
 }
 
+function calcularML() {
+  const totalMM = lista.reduce((sum, item) => sum + 2 * (item.anchoVentana + item.altoVentana), 0);
+  const totalM = totalMM / 1000;
+  document.getElementById('mlTotal').textContent = 'ML total obra: ' + totalM.toFixed(2) + 'mts';
+}
+
 function render() {
   const tbody = document.getElementById('tbody');
   const tbody2 = document.getElementById('tbody2');
   const empty = document.getElementById('empty');
   tbody.innerHTML = '';
   tbody2.innerHTML = '';
+  calcularML();
 
   if (lista.length === 0) {
     empty.style.display = 'block';
