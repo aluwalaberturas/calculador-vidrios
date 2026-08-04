@@ -369,6 +369,7 @@
           <th>Ancho (mm)</th>
           <th>Alto (mm)</th>
           <th>Composición</th>
+          <th>Cant.</th>
         </tr>
       </thead>
       <tbody id="tbody2"></tbody>
@@ -510,7 +511,8 @@ function render() {
       '<td>' + item.nombre + '</td>' +
       '<td>' + item.vidrioAncho + '</td>' +
       '<td>' + item.vidrioAlto + '</td>' +
-      '<td>' + item.composicion + '</td>';
+      '<td>' + item.composicion + '</td>' +
+      '<td>' + item.cantidad + '</td>';
     tbody2.appendChild(tr2);
   });
 }
