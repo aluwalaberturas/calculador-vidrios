@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculador de Vidrios — Aluwal Aberturas</title>
+<style>
+  :root {
+    --gold: #c9a96e;
+    --bg: #0d0d0d;
+    --panel: #161616;
+    --border: #2a2a2a;
+    --text: #eee;
+    --text-dim: #999;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px;
+    margin: 0;
+  }
+  .wrap {
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 40px 36px;
+  }
+  h1 {
+    font-size: 15px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text);
+    margin: 0 0 4px;
+    font-weight: 600;
+  }
+  .sub {
+    color: var(--gold);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  input[type="number"], input[type="text"], select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 14px;
+    font-size: 16px;
+    font-family: inherit;
+  }
+  input[type="number"]:focus, input[type="text"]:focus, select:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+  textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 60px;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+  .field { margin-bottom: 20px; }
+  button {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 13px;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  button:hover {
+    background: var(--gold);
+    color: #0d0d0d;
+  }
+  .btn-full { width: 100%; margin-top: 8px; }
+  .warn {
+    color: #d97b7b;
+    font-size: 12px;
+    margin-top: 16px;
+    display: none;
+  }
+  .warn.show { display: block; }
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .tab {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 11px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .tab.active {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* Lista / planilla */
+  .lista-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 32px 36px;
+    margin-top: 24px;
+  }
+  .lista-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .lista-head h2 {
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0;
+    color: var(--text);
+  }
+  .lista-actions { display: flex; gap: 10px; }
+  .lista-actions button { padding: 9px 16px; font-size: 10px; }
+  .tabla-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    text-align: left;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 6px;
+  }
+  td {
+    padding: 10px 6px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  td.gold { color: var(--gold); }
+  .del {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+  }
+  .del:hover { color: #d97b7b; }
+  .empty {
+    color: var(--text-dim);
+    font-size: 12px;
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .sheet2 { display: none; }
+
+  @media print {
+    body { background: #fff; color: #000; padding: 0; }
+    .card, .no-print { display: none !important; }
+    .lista-card { border: none; padding: 0; margin: 0; }
+    .lista-actions { display: none !important; }
+    table { font-size: 12px; }
+    th, td { color: #000; border-bottom: 1px solid #ccc; }
+    .del { display: none; }
+    .lista-head h2::before {
+      content: "ALUWAL ABERTURAS — PLANILLA DE VIDRIOS";
+      display: block;
+      font-size: 16px;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+    .sheet2 {
+      display: block;
+      page-break-before: always;
+    }
+    .sheet2 h2 {
+      font-size: 16px;
+      letter-spacing: 2px;
+      margin: 0 0 16px;
+      color: #000;
+    }
+    .sheet2 table { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="card">
+    <h1>Calculador de Vidrios</h1>
+    <div class="sub" id="subtitulo">Corrediza DVH · 2 hojas</div>
+
+    <div class="field">
+      <label>Identificador (V1, V2, cocina, etc.)</label>
+      <input type="text" id="nombre" placeholder="V1">
+    </div>
+
+    <div class="field">
+      <label>Piso</label>
+      <input type="text" id="piso" placeholder="PB, 1, 2...">
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" id="tabFrente" onclick="setLado('frente')">Frente</button>
+      <button class="tab" id="tabContrafrente" onclick="setLado('contrafrente')">Contrafrente</button>
+    </div>
+
+    <div class="field">
+      <label>Composición de vidrio</label>
+      <select id="composicion">
+        <option value="4/9/4">4/9/4</option>
+        <option value="4/12/4">4/12/4</option>
+        <option value="4/6/3+3">4/6/3+3</option>
+      </select>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" id="tabCorrediza" onclick="setTipo('corrediza')">Corrediza</button>
+      <button class="tab" id="tabFijo" onclick="setTipo('fijo')">Paño Fijo</button>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Ancho ventana (mm)</label>
+        <input type="number" id="ancho" placeholder="1500">
+      </div>
+      <div>
+        <label>Alto ventana (mm)</label>
+        <input type="number" id="alto" placeholder="800">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Observación</label>
+      <textarea id="observacion" placeholder="Notas adicionales..."></textarea>
+    </div>
+
+    <button class="btn-full" onclick="agregar()">Agregar a la lista</button>
+
+    <div class="warn" id="warn">Cargá ancho y alto de la ventana.</div>
+  </div>
+
+  <div class="lista-card">
+    <div class="lista-head no-print">
+      <h2>Planilla de vidrios</h2>
+      <div class="lista-actions">
+        <button onclick="imprimir()">Imprimir</button>
+        <button onclick="vaciar()">Vaciar</button>
+      </div>
+    </div>
+    <div class="lista-head" style="display:none;"><h2></h2></div>
+    <div class="tabla-wrap">
+    <table id="tabla">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Piso</th>
+          <th>Lado</th>
+          <th>Composición</th>
+          <th>Tipo</th>
+          <th>Ventana</th>
+          <th>Vidrio</th>
+          <th>Cant.</th>
+          <th>Obs.</th>
+          <th class="no-print"></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    </div>
+    <div class="empty" id="empty">Todavía no agregaste ningún vidrio.</div>
+  </div>
+
+  <div class="sheet2">
+    <h2>ALUWAL ABERTURAS — MEDIDAS DE VIDRIO</h2>
+    <table id="tabla2">
+      <thead>
+        <tr>
+          <th>Ancho (mm)</th>
+          <th>Alto (mm)</th>
+        </tr>
+      </thead>
+      <tbody id="tbody2"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+let tipo = 'corrediza';
+let lado = 'frente';
+let lista = JSON.parse(localStorage.getItem('aluwal_vidrios_lista') || '[]');
+
+function setLado(l) {
+  lado = l;
+  document.getElementById('tabFrente').classList.toggle('active', l === 'frente');
+  document.getElementById('tabContrafrente').classList.toggle('active', l === 'contrafrente');
+}
+
+function setTipo(t) {
+  tipo = t;
+  document.getElementById('tabCorrediza').classList.toggle('active', t === 'corrediza');
+  document.getElementById('tabFijo').classList.toggle('active', t === 'fijo');
+  document.getElementById('subtitulo').textContent =
+    t === 'corrediza' ? 'Corrediza DVH · 2 hojas' : 'Paño Fijo DVH';
+  document.getElementById('warn').classList.remove('show');
+}
+
+function agregar() {
+  const nombre = document.getElementById('nombre').value.trim() || '—';
+  const piso = document.getElementById('piso').value.trim() || '—';
+  const composicion = document.getElementById('composicion').value;
+  const observacion = document.getElementById('observacion').value.trim();
+  const ancho = parseFloat(document.getElementById('ancho').value);
+  const alto = parseFloat(document.getElementById('alto').value);
+  const warn = document.getElementById('warn');
+
+  if (!ancho || !alto) {
+    warn.textContent = 'Cargá ancho y alto de la ventana.';
+    warn.classList.add('show');
+    return;
+  }
+
+  let vidrioAncho, vidrioAlto, cantidad, tipoLabel;
+
+  if (tipo === 'corrediza') {
+    vidrioAncho = (ancho / 2) - 73;
+    vidrioAlto = alto - 165;
+    cantidad = 2;
+    tipoLabel = 'Corrediza';
+  } else {
+    vidrioAncho = ancho - 57;
+    vidrioAlto = alto - 57;
+    cantidad = 1;
+    tipoLabel = 'Paño Fijo';
+  }
+
+  if (vidrioAncho < 100 || vidrioAlto < 100) {
+    warn.textContent = 'Verificá las medidas — el resultado da negativo o muy chico.';
+    warn.classList.add('show');
+    return;
+  }
+
+  warn.classList.remove('show');
+
+  lista.push({
+    nombre,
+    piso,
+    lado: lado === 'frente' ? 'Frente' : 'Contrafrente',
+    composicion,
+    tipo: tipoLabel,
+    ventana: Math.round(ancho) + ' x ' + Math.round(alto),
+    vidrioAncho: Math.round(vidrioAncho),
+    vidrioAlto: Math.round(vidrioAlto),
+    cantidad,
+    observacion
+  });
+
+  guardar();
+  render();
+
+  document.getElementById('nombre').value = '';
+  document.getElementById('piso').value = '';
+  document.getElementById('ancho').value = '';
+  document.getElementById('alto').value = '';
+  document.getElementById('observacion').value = '';
+  document.getElementById('nombre').focus();
+}
+
+function eliminar(i) {
+  lista.splice(i, 1);
+  guardar();
+  render();
+}
+
+function vaciar() {
+  if (lista.length && !confirm('¿Vaciar toda la planilla?')) return;
+  lista = [];
+  guardar();
+  render();
+}
+
+function guardar() {
+  localStorage.setItem('aluwal_vidrios_lista', JSON.stringify(lista));
+}
+
+function render() {
+  const tbody = document.getElementById('tbody');
+  const tbody2 = document.getElementById('tbody2');
+  const empty = document.getElementById('empty');
+  tbody.innerHTML = '';
+  tbody2.innerHTML = '';
+
+  if (lista.length === 0) {
+    empty.style.display = 'block';
+    document.getElementById('tabla').style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  document.getElementById('tabla').style.display = 'table';
+
+  lista.forEach((item, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + item.nombre + '</td>' +
+      '<td>' + item.piso + '</td>' +
+      '<td>' + item.lado + '</td>' +
+      '<td>' + item.composicion + '</td>' +
+      '<td>' + item.tipo + '</td>' +
+      '<td>' + item.ventana + ' mm</td>' +
+      '<td class="gold">' + item.vidrioAncho + ' x ' + item.vidrioAlto + ' mm</td>' +
+      '<td>' + item.cantidad + '</td>' +
+      '<td>' + (item.observacion || '') + '</td>' +
+      '<td class="no-print"><button class="del" onclick="eliminar(' + i + ')">&times;</button></td>';
+    tbody.appendChild(tr);
+
+    const tr2 = document.createElement('tr');
+    tr2.innerHTML = '<td>' + item.vidrioAncho + '</td><td>' + item.vidrioAlto + '</td>';
+    tbody2.appendChild(tr2);
+  });
+}
+
+function imprimir() {
+  window.print();
+}
+
+document.getElementById('alto').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') agregar();
+});
+
+render();
+</script>
+
+</body>
+</html>
