@@ -295,6 +295,11 @@
       <button class="tab" id="tabContrafrente" onclick="setLado('contrafrente')">Contrafrente</button>
     </div>
 
+    <div class="tabs">
+      <button class="tab active" id="tabModena" onclick="setLinea('modena')">Modena</button>
+      <button class="tab" id="tabA30" onclick="setLinea('a30')">A30</button>
+    </div>
+
     <div class="field">
       <label>Composición de vidrio</label>
       <select id="composicion">
@@ -353,6 +358,7 @@
           <th>Piso</th>
           <th>Lado</th>
           <th>Composición</th>
+          <th>Línea</th>
           <th>Tipo</th>
           <th>Ventana</th>
           <th>Vidrio</th>
@@ -391,7 +397,19 @@
 <script>
 let tipo = 'corrediza';
 let lado = 'frente';
+let linea = 'modena';
 let lista = JSON.parse(localStorage.getItem('aluwal_vidrios_lista') || '[]');
+
+const FORMULAS = {
+  modena: {
+    corrediza: { calc: (a, h) => ({ vidrioAncho: (a / 2) - 73, vidrioAlto: h - 165, cantidad: 2 }) },
+    fijo: { calc: (a, h) => ({ vidrioAncho: a - 57, vidrioAlto: h - 57, cantidad: 1 }) }
+  },
+  a30: {
+    corrediza: { calc: (a, h) => ({ vidrioAncho: (a / 2) - 100, vidrioAlto: h - 185, cantidad: 2 }) },
+    fijo: null // todavía no disponible
+  }
+};
 
 function setLado(l) {
   lado = l;
@@ -399,13 +417,26 @@ function setLado(l) {
   document.getElementById('tabContrafrente').classList.toggle('active', l === 'contrafrente');
 }
 
+function setLinea(l) {
+  linea = l;
+  document.getElementById('tabModena').classList.toggle('active', l === 'modena');
+  document.getElementById('tabA30').classList.toggle('active', l === 'a30');
+  actualizarSubtitulo();
+  document.getElementById('warn').classList.remove('show');
+}
+
 function setTipo(t) {
   tipo = t;
   document.getElementById('tabCorrediza').classList.toggle('active', t === 'corrediza');
   document.getElementById('tabFijo').classList.toggle('active', t === 'fijo');
-  document.getElementById('subtitulo').textContent =
-    t === 'corrediza' ? 'Corrediza DVH · 2 hojas' : 'Paño Fijo DVH';
+  actualizarSubtitulo();
   document.getElementById('warn').classList.remove('show');
+}
+
+function actualizarSubtitulo() {
+  const lineaLabel = linea === 'modena' ? 'Modena' : 'A30';
+  const tipoLabel = tipo === 'corrediza' ? 'Corrediza DVH · 2 hojas' : 'Paño Fijo DVH';
+  document.getElementById('subtitulo').textContent = lineaLabel + ' · ' + tipoLabel;
 }
 
 function agregar() {
@@ -423,19 +454,17 @@ function agregar() {
     return;
   }
 
-  let vidrioAncho, vidrioAlto, cantidad, tipoLabel;
+  const lineaLabel = linea === 'modena' ? 'Modena' : 'A30';
+  const tipoLabel = tipo === 'corrediza' ? 'Corrediza' : 'Paño Fijo';
+  const formula = FORMULAS[linea][tipo];
 
-  if (tipo === 'corrediza') {
-    vidrioAncho = (ancho / 2) - 73;
-    vidrioAlto = alto - 165;
-    cantidad = 2;
-    tipoLabel = 'Corrediza';
-  } else {
-    vidrioAncho = ancho - 57;
-    vidrioAlto = alto - 57;
-    cantidad = 1;
-    tipoLabel = 'Paño Fijo';
+  if (!formula) {
+    warn.textContent = 'Todavía no tengo la fórmula de ' + lineaLabel + ' ' + tipoLabel + ' calibrada. Pasame 2-3 ejemplos (ventana y vidrio) para armarla.';
+    warn.classList.add('show');
+    return;
   }
+
+  const { vidrioAncho, vidrioAlto, cantidad } = formula.calc(ancho, alto);
 
   if (vidrioAncho < 100 || vidrioAlto < 100) {
     warn.textContent = 'Verificá las medidas — el resultado da negativo o muy chico.';
@@ -450,6 +479,7 @@ function agregar() {
     piso,
     lado: lado === 'frente' ? 'Frente' : 'Contrafrente',
     composicion,
+    linea: lineaLabel,
     tipo: tipoLabel,
     anchoVentana: Math.round(ancho),
     altoVentana: Math.round(alto),
@@ -517,6 +547,7 @@ function render() {
       '<td>' + item.piso + '</td>' +
       '<td>' + item.lado + '</td>' +
       '<td>' + item.composicion + '</td>' +
+      '<td>' + item.linea + '</td>' +
       '<td>' + item.tipo + '</td>' +
       '<td>' + item.ventana + ' mm</td>' +
       '<td class="gold">' + item.vidrioAncho + ' x ' + item.vidrioAlto + ' mm</td>' +
@@ -547,6 +578,7 @@ document.getElementById('alto').addEventListener('keypress', function(e) {
   if (e.key === 'Enter') agregar();
 });
 
+actualizarSubtitulo();
 render();
 </script>
 
