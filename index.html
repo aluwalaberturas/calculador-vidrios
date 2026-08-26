@@ -118,6 +118,8 @@
     gap: 10px;
     margin-bottom: 24px;
   }
+  .tabs3 { grid-template-columns: 1fr 1fr 1fr; }
+  .tabs3 .tab { padding: 11px 4px; font-size: 9.5px; letter-spacing: 1px; }
   .tab {
     background: transparent;
     border: 1px solid var(--border);
@@ -309,8 +311,9 @@
       </select>
     </div>
 
-    <div class="tabs">
-      <button class="tab active" id="tabCorrediza" onclick="setTipo('corrediza')">Corrediza</button>
+    <div class="tabs tabs3">
+      <button class="tab active" id="tabCorrediza2" onclick="setTipo('corrediza2')">Corrediza 2H</button>
+      <button class="tab" id="tabCorrediza3" onclick="setTipo('corrediza3')">Corrediza 3H</button>
       <button class="tab" id="tabFijo" onclick="setTipo('fijo')">Paño Fijo</button>
     </div>
 
@@ -395,20 +398,28 @@
 </div>
 
 <script>
-let tipo = 'corrediza';
+let tipo = 'corrediza2';
 let lado = 'frente';
 let linea = 'modena';
 let lista = JSON.parse(localStorage.getItem('aluwal_vidrios_lista') || '[]');
 
 const FORMULAS = {
   modena: {
-    corrediza: { calc: (a, h) => ({ vidrioAncho: (a / 2) - 73, vidrioAlto: h - 165, cantidad: 2 }) },
+    corrediza2: { calc: (a, h) => ({ vidrioAncho: (a / 2) - 73, vidrioAlto: h - 165, cantidad: 2 }) },
+    corrediza3: null, // todavía no disponible
     fijo: { calc: (a, h) => ({ vidrioAncho: a - 57, vidrioAlto: h - 57, cantidad: 1 }) }
   },
   a30: {
-    corrediza: { calc: (a, h) => ({ vidrioAncho: (a / 2) - 100, vidrioAlto: h - 185, cantidad: 2 }) },
+    corrediza2: { calc: (a, h) => ({ vidrioAncho: (a / 2) - 100, vidrioAlto: h - 185, cantidad: 2 }) },
+    corrediza3: { calc: (a, h) => ({ vidrioAncho: (a / 3) - 82, vidrioAlto: h - 238, cantidad: 3 }) },
     fijo: null // todavía no disponible
   }
+};
+
+const TIPO_LABELS = {
+  corrediza2: 'Corrediza 2H',
+  corrediza3: 'Corrediza 3H',
+  fijo: 'Paño Fijo'
 };
 
 function setLado(l) {
@@ -427,7 +438,8 @@ function setLinea(l) {
 
 function setTipo(t) {
   tipo = t;
-  document.getElementById('tabCorrediza').classList.toggle('active', t === 'corrediza');
+  document.getElementById('tabCorrediza2').classList.toggle('active', t === 'corrediza2');
+  document.getElementById('tabCorrediza3').classList.toggle('active', t === 'corrediza3');
   document.getElementById('tabFijo').classList.toggle('active', t === 'fijo');
   actualizarSubtitulo();
   document.getElementById('warn').classList.remove('show');
@@ -435,8 +447,7 @@ function setTipo(t) {
 
 function actualizarSubtitulo() {
   const lineaLabel = linea === 'modena' ? 'Modena' : 'A30';
-  const tipoLabel = tipo === 'corrediza' ? 'Corrediza DVH · 2 hojas' : 'Paño Fijo DVH';
-  document.getElementById('subtitulo').textContent = lineaLabel + ' · ' + tipoLabel;
+  document.getElementById('subtitulo').textContent = lineaLabel + ' · ' + TIPO_LABELS[tipo] + ' DVH';
 }
 
 function agregar() {
@@ -455,7 +466,7 @@ function agregar() {
   }
 
   const lineaLabel = linea === 'modena' ? 'Modena' : 'A30';
-  const tipoLabel = tipo === 'corrediza' ? 'Corrediza' : 'Paño Fijo';
+  const tipoLabel = TIPO_LABELS[tipo];
   const formula = FORMULAS[linea][tipo];
 
   if (!formula) {
